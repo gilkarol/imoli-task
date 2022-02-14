@@ -5,7 +5,7 @@ const listSchema = new Schema({
 		type: String,
 		required: true
 	},
-	items: [
+	movies: [
 		{
 			type: Schema.Types.ObjectId,
 			ref: 'ListItem',

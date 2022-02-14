@@ -21,7 +21,9 @@ router.get(
 					movie_id: film.url.split('/')[5],
 				}
 			})
-			res.status(200).json({ films: result })
+			res
+				.status(200)
+				.json({ message: 'Movies found successfully!', films: result })
 		} catch (err) {
 			console.log(err)
 		}
@@ -67,12 +69,36 @@ router.post(
 					}
 				}
 				await listItem.save()
-				list.items.push(listItem)
+				list.movies.push(listItem)
 			}
 			await list.save()
-			res.status(200).json({ message: 'success' })
+			res.status(200).json({ message: 'List added successfully!' })
 		} catch (err) {
 			next(err)
+		}
+	}
+)
+
+router.get(
+	'/favorites',
+	async (req: Request, res: Response, next: NextFunction) => {
+		const page: number = +req.query.page! || 1
+		const listsOnPage: number = 2
+		try {
+			const listsNumber: number = await List.countDocuments()
+			const lists = await List.find().select('name')
+				.skip(listsOnPage * page - listsOnPage)
+				.limit(listsOnPage)
+
+			res.status(200).json({
+				message: 'Lists found successfully!',
+				lists: lists,
+				hasPreviousPage: page !== 1,
+				page: page,
+				hasNextPage: (listsOnPage * page) < listsNumber,
+			})
+		} catch (err) {
+			console.log(err)
 		}
 	}
 )
