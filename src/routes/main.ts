@@ -8,12 +8,14 @@ router.get(
 	'/films',
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const response = await (await fetch('https://swapi.dev/api/films/')).json()
+			const response = await (
+				await fetch('https://swapi.dev/api/films/')
+			).json()
 			const result = response.results.map((item: any) => {
 				return {
 					release_date: item.release_date,
 					title: item.title,
-					episode_id: item.episode_id,
+					movie_id: item.url.split('/')[5],
 				}
 			})
 			res.status(200).json({ films: result })
