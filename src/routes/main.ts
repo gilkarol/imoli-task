@@ -72,7 +72,7 @@ router.post(
 				list.movies.push(listItem)
 			}
 			await list.save()
-			res.status(200).json({ message: 'List added successfully!' })
+			res.status(201).json({ message: 'List added successfully!' })
 		} catch (err) {
 			next(err)
 		}
@@ -86,7 +86,8 @@ router.get(
 		const listsOnPage: number = 2
 		try {
 			const listsNumber: number = await List.countDocuments()
-			const lists = await List.find().select('name')
+			const lists = await List.find()
+				.select('name')
 				.skip(listsOnPage * page - listsOnPage)
 				.limit(listsOnPage)
 
@@ -95,7 +96,7 @@ router.get(
 				lists: lists,
 				hasPreviousPage: page !== 1,
 				page: page,
-				hasNextPage: (listsOnPage * page) < listsNumber,
+				hasNextPage: listsOnPage * page < listsNumber,
 			})
 		} catch (err) {
 			console.log(err)
@@ -103,4 +104,17 @@ router.get(
 	}
 )
 
+router.get(
+	'/favorites/:id',
+	async (req: Request, res: Response, next: NextFunction) => {
+		const listId: string = req.params.id
+		try {
+			const list = await List.findById(listId).populate({path: 'movies', populate: {path: 'list_of_characters'}})
+			if (!list) res.status(404).json({ message: 'List not found!' })
+			res.status(200).json({ message: 'List found successfully!', list: list })
+		} catch (err) {
+			next(err)
+		}
+	}
+)
 export default router
