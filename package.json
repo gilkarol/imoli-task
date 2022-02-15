@@ -22,12 +22,14 @@
     "dotenv": "^16.0.0",
     "express": "^4.17.2",
     "mongoose": "^6.2.1",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.7",
+    "xlsx": "^0.18.2"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.13",
     "@types/mongoose": "^5.11.97",
-    "@types/node-fetch": "^2.5.12"
+    "@types/node-fetch": "^2.5.12",
+    "@types/xlsx": "^0.0.36"
   }
 }
