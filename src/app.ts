@@ -10,7 +10,6 @@ const app = express()
 
 app.use(bodyparser.json())
 app.use(routes)
-
 mongoose
 	.connect(process.env.MONGODB_DATABASE as string)
 	.then((result) => {
