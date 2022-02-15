@@ -39,14 +39,17 @@ router.post(
 		const name: string = req.body.name
 
 		try {
-			const listExists = await List.findOne({ name: name })
+			const movies = movieId.replace(/\s/g, '').split(',').sort()
+			const listExists =
+				(await List.findOne({ name: name })) ||
+				(await List.findOne({ movieIds: movies }))
 			if (listExists)
 				res
 					.status(409)
-					.json({ message: 'Error! List with this name already exists!' })
-			const movies = movieId.split(', ')
+					.json({ message: 'Error! List with this movies or with this name already exists!' })
 			const list = new List({
 				name: name,
+				movieIds: movies,
 			})
 			for (let movie of movies) {
 				const response = await (
@@ -67,7 +70,7 @@ router.post(
 						const personJson = await person.json()
 						const newCharacter = new Character({
 							URL: character,
-							name: personJson.name
+							name: personJson.name,
 						})
 						await newCharacter.save()
 						listItem.list_of_characters.push(newCharacter)
@@ -146,7 +149,10 @@ router.get(
 						(element: any) => element.character === character.name
 					)
 					if (index > -1) {
-						file[index] = { character: character.name, movie: `${file[index].movie}, ${movie.title}` }
+						file[index] = {
+							character: character.name,
+							movie: `${file[index].movie}, ${movie.title}`,
+						}
 					} else {
 						file.push({ character: character.name, movie: movie.title })
 					}
@@ -156,11 +162,16 @@ router.get(
 			const workSheet = xlsx.utils.json_to_sheet(file)
 			xlsx.utils.book_append_sheet(workBook, workSheet, 'list')
 
-			xlsx.write(workBook, {bookType: 'xlsx', type: 'binary'})
-			xlsx.write(workBook, {bookType: 'xlsx', type: 'buffer'})
+			xlsx.write(workBook, { bookType: 'xlsx', type: 'binary' })
+			xlsx.write(workBook, { bookType: 'xlsx', type: 'buffer' })
 
-			const buffer = Buffer.from(xlsx.write(workBook, {bookType: 'xlsx', type: 'buffer'}))
-			res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+			const buffer = Buffer.from(
+				xlsx.write(workBook, { bookType: 'xlsx', type: 'buffer' })
+			)
+			res.setHeader(
+				'Content-Type',
+				'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+			)
 			res.status(200).send(buffer)
 		} catch (err) {
 			next(err)
