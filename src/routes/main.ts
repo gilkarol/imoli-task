@@ -1,4 +1,6 @@
 import { Response, Request, NextFunction, Router } from 'express'
+import xlsx from 'xlsx'
+import path from 'path'
 
 import Character from '../models/Character'
 import ListItem from '../models/ListItem'
@@ -61,8 +63,11 @@ router.post(
 					if (char) listItem.list_of_characters.push(char)
 
 					if (!char) {
+						const person = await fetch(character)
+						const personJson = await person.json()
 						const newCharacter = new Character({
 							URL: character,
+							name: personJson.name
 						})
 						await newCharacter.save()
 						listItem.list_of_characters.push(newCharacter)
@@ -109,7 +114,10 @@ router.get(
 	async (req: Request, res: Response, next: NextFunction) => {
 		const listId: string = req.params.id
 		try {
-			const list = await List.findById(listId).populate({path: 'movies', populate: {path: 'list_of_characters'}})
+			const list = await List.findById(listId).populate({
+				path: 'movies',
+				populate: { path: 'list_of_characters', select: 'name' },
+			})
 			if (!list) res.status(404).json({ message: 'List not found!' })
 			res.status(200).json({ message: 'List found successfully!', list: list })
 		} catch (err) {
@@ -117,4 +125,47 @@ router.get(
 		}
 	}
 )
+
+router.get(
+	'/favorites/:id/file',
+	async (req: Request, res: Response, next: NextFunction) => {
+		const listId: string = req.params.id
+		try {
+			const list = await List.findById(listId).populate({
+				path: 'movies',
+				select: 'title list_of_characters',
+				populate: {
+					path: 'list_of_characters',
+				},
+			})
+			const movies = list.movies
+			const file: any = []
+			for (let movie of movies) {
+				for (let character of movie.list_of_characters) {
+					const index = file.findIndex(
+						(element: any) => element.character === character.name
+					)
+					if (index > -1) {
+						file[index] = { character: character.name, movie: `${file[index].movie}, ${movie.title}` }
+					} else {
+						file.push({ character: character.name, movie: movie.title })
+					}
+				}
+			}
+			const workBook = xlsx.utils.book_new()
+			const workSheet = xlsx.utils.json_to_sheet(file)
+			xlsx.utils.book_append_sheet(workBook, workSheet, 'list')
+
+			xlsx.write(workBook, {bookType: 'xlsx', type: 'binary'})
+			xlsx.write(workBook, {bookType: 'xlsx', type: 'buffer'})
+
+			const buffer = Buffer.from(xlsx.write(workBook, {bookType: 'xlsx', type: 'buffer'}))
+			res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+			res.status(200).send(buffer)
+		} catch (err) {
+			next(err)
+		}
+	}
+)
+
 export default router
