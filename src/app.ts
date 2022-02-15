@@ -25,7 +25,7 @@ app.use(routes)
 mongoose
 	.connect(process.env.MONGODB_DATABASE as string)
 	.then((result) => {
-		app.listen(8080)
+		app.listen(process.env.PORT || 8080)
 	})
 	.catch((err) => {
 		console.log(err)

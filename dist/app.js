@@ -21,7 +21,7 @@ app.use(main_1.default);
 mongoose_1.default
     .connect(process.env.MONGODB_DATABASE)
     .then((result) => {
-    app.listen(8080);
+    app.listen(process.env.PORT || 8080);
 })
     .catch((err) => {
     console.log(err);
