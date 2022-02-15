@@ -7,7 +7,6 @@ dotenv.config({ path: './.env' })
 import bodyparser from 'body-parser'
 
 const app = express()
-
 app.use(bodyparser.json())
 app.use(routes)
 mongoose
