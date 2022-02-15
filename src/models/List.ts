@@ -3,8 +3,13 @@ import mongoose, { Schema } from 'mongoose'
 const listSchema = new Schema({
 	name: {
 		type: String,
-		required: true
+		required: true,
 	},
+	movieIds: [
+		{
+			type: String,
+		},
+	],
 	movies: [
 		{
 			type: Schema.Types.ObjectId,
