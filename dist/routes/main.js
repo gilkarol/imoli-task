@@ -159,4 +159,7 @@ router.get('/favorites/:id/file', (req, res, next) => __awaiter(void 0, void 0, 
         next(err);
     }
 }));
+router.use('*', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    res.status(404).json({ message: 'This route is invalid! Correct routes are: GET /films, POST /favorites, GET /favorites, GET /favorites/:id, GET /favorites/:id/file' });
+}));
 exports.default = router;

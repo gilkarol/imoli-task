@@ -179,4 +179,8 @@ router.get(
 	}
 )
 
+router.use('*', async (req: Request, res: Response, next: NextFunction) => {
+	res.status(404).json({message: 'This route is invalid! Correct routes are: GET /films, POST /favorites, GET /favorites, GET /favorites/:id, GET /favorites/:id/file'})
+})
+
 export default router
